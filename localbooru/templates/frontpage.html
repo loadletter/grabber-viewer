@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+		<meta charset="UTF-8">
+		<link rel="SHORTCUT ICON" href="static/icons/favicon.png">
+		<title>Localbooru</title>
+		<link rel="stylesheet" type="text/css" media="screen" href="static/default.css" title="default">
+	</head>
+	<body style="font-size: 80%;">
+		<br><br><br>
+		<div id="static-index">
+			<h1 style="font-size: 4em; margin-top: 1em;"><a href="/">Localbooru</a></h1>
+				<div id="links">
+					<a href="/ls" title="A paginated list of every post">Posts</a>
+					<a href="/queue">Queue</a>
+					<a href="/logout">Logout</a>
+				</div>
+				<form action="/view" method="post">
+					<center>
+						<div style>
+							<input id="tags" name="tags" size="38" type="text"><br>
+							<input name="searchDefault" value="Search" type="submit">
+						</div>
+					</center>
+				</form>
+				<div style="font-size: 80%; margin-bottom: 2em;">
+					<p>Serving {{postcount}} posts - Running Localbooru alpha {{version}}</p><br>
+					{% for n in postcount %}
+					<img src="static/counter{% if animated %}_animated{% endif %}/{{n}}.gif" alt="{{n}}" border="0">
+					{% endfor %}
+					<br>
+				</div>
+				<br><br><br><br>
+				<div style="width: 100%; border-top: 1px solid #7aa5d6; text-align: center;0"></div>
+			</div>
+	</body>
+</html>
