@@ -41,7 +41,7 @@
         <br>
         <div>
 		{% for post in postlist %}
-			<span id="s{{post.id}}" class="thumb"><a id="p{{post.id}}" href="{{post.viewurl}}"><img src="{{post.thumburl}}" alt="{{post.tags|e}}" title="{{post.tags|e}}" class="preview " border="0"></a></span>
+			<span id="s{{post.id}}" class="thumb"><a id="p{{post.id}}" href="{{post.viewurl|e}}"><img src="{{post.thumburl|e}}" alt="{{post.tags|e}}" title="{{post.tags|e}}" class="preview " border="0"></a></span>
 		{% endfor %}
         </div>
         <br>
@@ -49,17 +49,17 @@
         <div id="paginator">
             <div class="pagination">
 				{% if paginator.current > 1 %}
-					<a href="{{paginator.firsturl}}" name="first_page">&lt;&lt;</a> <a href="{{paginator.backurl}}" name="back">&lt;</a>
+					<a href="{{paginator.firsturl|e}}" name="first_page">&lt;&lt;</a> <a href="{{paginator.backurl|e}}" name="back">&lt;</a>
 				{% endif %}
 				{% for page in pagelist %}
 					{% if page.number == paginator.current %}
 						<span class="current">{{page.number}}</span>
 					{% else %}
-						<a href="{{page.url}}">{{page.number}}</a>
+						<a href="{{page.url|e}}">{{page.number}}</a>
 					{% endif %}
 				{% endfor %}
 				{% if paginator.current < paginator.total %}
-					<a href="{{paginator.nexturl}}" name="next">&gt;</a> <a href="{{paginator.lasturl}}" name="last_page">&gt;&gt;</a>
+					<a href="{{paginator.nexturl|e}}" name="next">&gt;</a> <a href="{{paginator.lasturl|e}}" name="last_page">&gt;&gt;</a>
 				{% endif %}
 			</div>
 		</div>
