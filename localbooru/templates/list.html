@@ -1,42 +1,5 @@
-{% extends "base.html" %}
-{% block content %}
-<div id="post-list">
-    <div class="sidebar">
-        <div style="margin-bottom: 1em;">
-            <h5>Search</h5>
-            <form action="index.php?page=search" method="post">
-                <div>
-                    <input id="tags" name="tags" style="width: 142px;" type="text">
-                    <br>
-                    <input name="commit" style="margin-top: 3px; background: #fff; border: 1px solid #dadada; width: 154px;" value="Search" type="submit">
-                </div>
-            </form>
-            <small>(Supports wildcard *)</small>
-        </div>
-        <div id="blacklisted-sidebar" style="display: none;">
-            <h5>
-        <a href="#" onclick="showHideIgnored('0','pi'); return false;">Hidden</a>
-        <span id="blacklist-count" class="post-count"></span>
-      </h5>
-        </div>
-        <div>
-            <h5>Tags</h5>
-
-            <ul id="tag-sidebar">
-			{% for tag in taglist %}
-                <li class="tag-type-{{tag.type}}"><a href="#" onclick="document.location={{tag.addurl|e}}'; return false;">+</a>
-                    <a href="#" onclick="document.location='{{tag.removeurl|e}}'; return false;">-</a>
-                    <a href="{{tag.searchurl|e}}">{{tag.name}}</a> <span style="color: #a0a0a0;">{{tag.count}}</span>
-                </li>
-            {% endfor %}
-                <li>
-                    <br>
-                    <br>
-                </li>
-            </ul>
-        </div>
-    </div>
-    <div class="content">
+{% extends "tagbase.html" %}
+{% block innercontent %}
         <br>
         <br>
         <div>
