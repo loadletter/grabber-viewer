@@ -1,0 +1,15 @@
+{% extends "tagbase.html" %}
+{% block innercontent %}
+            <br>
+            <br>
+            <div>
+                <div id="note-container">
+                </div>
+                <img alt="{{img.tags}}" src="{{img.url}}" id="image" width="320" height="240">
+                <br>
+                <div style="margin-bottom: 1em;">
+                    <p id="note-count"></p>
+                </div>
+            <div>
+{% endblock %}
+{% block title %}{{title}}{% endblock %}
