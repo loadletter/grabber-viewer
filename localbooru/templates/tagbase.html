@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
-<div id="post-list">
+<div id="post-{{view_type}}">
     <div class="sidebar">
         <div style="margin-bottom: 1em;">
             <h5>Search</h5>
@@ -40,7 +40,11 @@
 			<h5>{{stats.title}}</h5>
 			<ul>
 			{% for stat in stats.content %}
-				<li>{{stat}}</li>
+				{% if stat.url %}
+					<li><a href="{{stat.href}}" onclick="{{stat.onclick}}">{{stat.text}}</a></li>
+				{% else %}
+					<li>{{stat.text}}</li>
+				{% endif %}
 			{% endfor %}
 			</ul>
 		{% endfor %}
