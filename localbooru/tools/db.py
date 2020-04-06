@@ -1,23 +1,18 @@
 import sqlite3
 import os
 import threading
+import cherrypy
 from contextlib import contextmanager
 
-DATABASES = ['main', 'cache', 'prefs']
+DATABASES = ['main', 'cache']
 
 MAIN_DB_SCHEMA = '''
-PRAGMA synchronous = FULL;
-CREATE TABLE IF NOT EXISTS posts (id INTEGER PRIMARY KEY, website TEXT, origid INTEGER, creation_date datetime DEFAULT NULL, md5 BLOB(32) NOT NULL, image VARCHAR(255) DEFAULT NULL, height INTEGER unsigned default '0', width INTEGER, unsigned default '0', ext varchar(10) DEFAULT NULL, rating text, tags text NOT NULL);
+CREATE TABLE IF NOT EXISTS posts (id INTEGER PRIMARY KEY, website TEXT, origid INTEGER, creation_date datetime DEFAULT NULL, hash text NOT NULL, image VARCHAR(255) DEFAULT NULL, height INTEGER unsigned default '0', width INTEGER unsigned default '0', ext varchar(10) DEFAULT NULL, rating text, tags text NOT NULL);
 '''
 
 CACHE_DB_SCHEMA = '''
 PRAGMA synchronous = OFF
 CREATE TABLE IF NOT EXISTS thumbnails (md5 BLOB(16) PRIMARY KEY, imgdata BLOB);
-'''
-
-PREFS_DB_SCHEMA = '''
-PRAGMA synchronous = FULL;
-CREATE TABLE IF NOT EXISTS config (key TEXT PRIMARY KEY, value TEXT);
 '''
 
 
@@ -50,6 +45,7 @@ class SerializedConnection:
 class LocalbooruDB:
 	def __init__(self, database_directory):
 		self._conns = []
+		cherrypy.log("Initializing...", context='DATABASE')
 		for db in DATABASES:
 			serconn = SerializedConnection(os.path.join(database_directory, db + '.sqlite3'))
 			with serconn.get() as conn, conn:
@@ -60,6 +56,7 @@ class LocalbooruDB:
 			self._conns.append(serconn)
 			setattr(self, db, serconn)
 	def close(self):
+		cherrypy.log("Closing connections", context='DATABASE')
 		for serconn in self._conns:
 			serconn.close()
-			
+		cherrypy.log("Connections closed", context='DATABASE')
