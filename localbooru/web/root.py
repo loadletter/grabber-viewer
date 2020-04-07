@@ -1,7 +1,7 @@
 import cherrypy
 
 from localbooru.tools.common import get_version
-from templates import jinja_env
+from . templates import jinja_env
 
 class RootServer:
 	@cherrypy.expose

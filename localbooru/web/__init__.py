@@ -1,8 +1,8 @@
 import cherrypy
 
-from view import ViewServer
-from ls import ListServer
-from root import RootServer
+from . view import ViewServer
+from . ls import ListServer
+from . root import RootServer
 
 from localbooru.tools.db import LocalbooruDB
 from localbooru.tools.settings import cherrypy_config, application_config, db_dir

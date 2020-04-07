@@ -1,6 +1,6 @@
 import cherrypy
 
-from templates import jinja_env
+from . templates import jinja_env
 
 class ViewServer:
 	@cherrypy.expose
