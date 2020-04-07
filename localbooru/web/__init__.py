@@ -3,9 +3,11 @@ import cherrypy
 from . view import ViewServer
 from . ls import ListServer
 from . root import RootServer
+from . thumb import ThumbServer
 
 from localbooru.tools.db import LocalbooruDB
-from localbooru.tools.settings import cherrypy_config, application_config, db_dir
+from localbooru.tools.tumbler import ThumbNailer
+from localbooru.tools.settings import cherrypy_config, application_config, db_dir, cache_db
 
 
 class LocalBooru:
@@ -14,9 +16,11 @@ class LocalBooru:
 		cherrypy.config.update(cherrypy_config)
 		self.config = application_config
 		cherrypy.tools.db = LocalbooruDB(db_dir)
+		cherrypy.tools.thumb = ThumbNailer(cache_db)
 		
 		cherrypy.tree.mount(ListServer(), '/ls', self.config)
 		cherrypy.tree.mount(ViewServer(), '/view', self.config)
+		cherrypy.tree.mount(ThumbServer(), '/thumb', self.config)
 		cherrypy.engine.subscribe('stop', self.stop)
 		
 	def start(self):        
@@ -25,4 +29,5 @@ class LocalBooru:
 	
 	def stop(self):
 		cherrypy.tools.db.close()
+		cherrypy.tools.thumb.stop()
 		

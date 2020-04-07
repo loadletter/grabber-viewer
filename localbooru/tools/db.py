@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS posts (id INTEGER PRIMARY KEY, website TEXT, origid I
 
 CACHE_DB_SCHEMA = '''
 PRAGMA synchronous = OFF
-CREATE TABLE IF NOT EXISTS thumbnails (md5 BLOB(16) PRIMARY KEY, imgdata BLOB);
+CREATE TABLE IF NOT EXISTS thumbnails (md5 TEXT PRIMARY KEY, imgdata BLOB);
 '''
 
 
