@@ -21,8 +21,10 @@ cherrypy_config = { 'global': {'server.socket_host': settings.WEBSERVER_HOST,
 
 application_config = { '/': 	{'tools.auth_basic.on': settings.WEBSERVER_AUTH,
 							'tools.auth_basic.realm': 'Restricted space',
-							'tools.auth_basic.checkpassword': checkpassword,
-							'tools.staticdir.root': data_dir},
+							'tools.auth_basic.checkpassword': checkpassword},
 					'/static': {'tools.gzip.on': True,
 							'tools.staticdir.on': True,
-							'tools.staticdir.dir': 'static'}}
+							'tools.staticdir.dir': os.path.join(data_dir, 'static')},
+					'/image': {'tools.gzip.on': False,
+							'tools.staticdir.on': True,
+							'tools.staticdir.dir': image_dir}}
