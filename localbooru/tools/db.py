@@ -4,15 +4,22 @@ import threading
 import cherrypy
 from contextlib import contextmanager
 
-DATABASES = ['main', 'cache']
+DATABASES = ['metadata', 'thumb', 'cache']
 
-MAIN_DB_SCHEMA = '''
+METADATA_DB_SCHEMA = '''
 CREATE TABLE IF NOT EXISTS posts (id INTEGER PRIMARY KEY, website TEXT, origid INTEGER, creation_date datetime DEFAULT NULL, hash text NOT NULL, image VARCHAR(255) DEFAULT NULL, height INTEGER unsigned default '0', width INTEGER unsigned default '0', ext varchar(10) DEFAULT NULL, rating text, tags text NOT NULL);
 '''
 
-CACHE_DB_SCHEMA = '''
+THUMB_DB_SCHEMA = '''
 PRAGMA synchronous = OFF
 CREATE TABLE IF NOT EXISTS thumbnails (md5 TEXT PRIMARY KEY, imgdata BLOB);
+'''
+
+CACHE_DB_SCHEMA = '''
+PRAGMA foreign_keys = ON;
+CREATE TABLE IF NOT EXISTS posts (id INTEGER PRIMARY KEY, website TEXT, origid INTEGER, creation_date datetime DEFAULT NULL, hash BLOB(16) NOT NULL, image VARCHAR(255) DEFAULT NULL, rating text);
+CREATE TABLE IF NOT EXISTS tags (id INTEGER PRIMARY KEY, name TEXT, type TEXT, UNIQUE(name, type) ON CONFLICT ABORT);
+CREATE TABLE IF NOT EXISTS tagmap (post INTEGER, tag INTEGER, PRIMARY KEY (post, tag), FOREIGN KEY (post) references posts(id) ON DELETE CASCADE, FOREIGN KEY (tag) references tags(id) ON DELETE CASCADE);
 '''
 
 
