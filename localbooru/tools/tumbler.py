@@ -1,10 +1,13 @@
 import multiprocessing
+import subprocess
 import signal
 import sqlite3
 import io
+import os
 import cherrypy
 
 from PIL import Image
+from tempfile import NamedTemporaryFile
 
 THUMB_SIZE = (150, 150)
 
@@ -14,6 +17,15 @@ def img_thumb(src_file):
 	stream = io.BytesIO()
 	img.save(stream, format='JPEG')
 	return stream.getvalue()
+
+def video_thumb(src_file):
+	outfile = NamedTemporaryFile()
+	call_args = ['ffmpeg', '-i', src_file, '-ss', '00:00:00.000', '-vframes', '1', outfile.name]
+	subprocess.call(call_args)
+	outfile.seek(0)
+	thumb = img_thumb(outfile)
+	outfile.close()
+	return thumb
 
 def thumb_worker(queue, db_filename, workernum=None):
 	signal.signal(signal.SIGINT, signal.SIG_IGN)
@@ -29,7 +41,10 @@ def thumb_worker(queue, db_filename, workernum=None):
 		if data:
 			continue
 		
-		thumb = img_thumb(src_file)
+		if os.path.splitext(src_file)[1] in ['png', 'gif', 'jpg', 'jpeg']:
+			thumb = img_thumb(src_file)
+		else:
+			thumb = video_thumb(src_file)
 		
 		with sqlite3.connect(db_filename) as conn:
 			conn.execute('INSERT OR IGNORE INTO thumbnails(md5, imgdata) VALUES (?,?)', (md5, thumb))
