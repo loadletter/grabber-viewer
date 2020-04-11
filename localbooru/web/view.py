@@ -18,6 +18,15 @@ class ViewServer:
 			res = cur.fetchall()
 		if not res:
 			raise cherrypy.HTTPError(status=404)
-		img['url'] = "/image/%s" % res[0][2]
+		img['url'] = "/imge/%s" % res[0][2]
 		img['tags'] = ' '.join(map(lambda x: x[0], res))
-		return jinja_env.get_template("view.html").render(view_type="post", img=img)
+		taglist = []
+		for r in res:
+			tag = {}
+			tag['addurl'] = ''
+			tag['removeurl'] = ''
+			tag['searchurl'] = ''
+			tag['type'] = 'general'
+			tag['name'] = r[0]
+			taglist.append(tag)
+		return jinja_env.get_template("view.html").render(view_type="post", img=img, taglist=taglist)
