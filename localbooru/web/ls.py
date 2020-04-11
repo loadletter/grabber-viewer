@@ -24,7 +24,7 @@ class ListServer:
 						cherrypy.tools.thumb.create(md5, imagepath)
 					post = {}
 					post['id'] = p[0]
-					post['viewurl'] = '/image/?md5=%s' % binascii.b2a_hex(p[2]).decode('utf-8')
+					post['viewurl'] = '/view/?id=%s' % p[0]
 					post['thumburl'] = '/thumb/?md5=%s' % binascii.b2a_hex(p[2]).decode('utf-8')
 					post['tags'] = p[1]
 					currpost = p[0]
