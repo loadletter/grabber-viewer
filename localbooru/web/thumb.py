@@ -1,12 +1,14 @@
 import cherrypy
 import io
+import binascii
 
 class ThumbServer:	
 	@cherrypy.expose
 	def index(self, md5):
 		img_data = None
-		with cherrypy.tools.db.cache.get() as conn, conn:
-			cur = conn.execute('SELECT imgdata FROM thumbnails WHERE md5 = ?', (md5,))
+		bin_md5 = binascii.a2b_hex(md5)
+		with cherrypy.tools.db.thumb.get() as conn, conn:
+			cur = conn.execute('SELECT imgdata FROM thumbnails WHERE md5 = ?', (bin_md5,))
 			img_data = cur.fetchone()
 			
 		if img_data:

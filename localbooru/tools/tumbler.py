@@ -7,7 +7,9 @@ import os
 import cherrypy
 
 from PIL import Image
-from tempfile import NamedTemporaryFile
+from tempfile import mktemp
+
+from . settings import image_dir
 
 THUMB_SIZE = (150, 150)
 
@@ -15,16 +17,16 @@ def img_thumb(src_file):
 	img = Image.open(src_file)
 	img.thumbnail(THUMB_SIZE)
 	stream = io.BytesIO()
+	img.convert('RGB')
 	img.save(stream, format='JPEG')
 	return stream.getvalue()
 
 def video_thumb(src_file):
-	outfile = NamedTemporaryFile()
-	call_args = ['ffmpeg', '-i', src_file, '-ss', '00:00:00.000', '-vframes', '1', outfile.name]
+	outfile = mktemp(suffix='.jpg')
+	call_args = ['ffmpeg', '-hide_banner', '-loglevel', 'warning', '-y', '-i', src_file, '-ss', '00:00:00.000', '-vframes', '1', outfile]
 	subprocess.call(call_args)
-	outfile.seek(0)
-	thumb = img_thumb(outfile)
-	outfile.close()
+	with open(outfile, 'rb') as f:
+		thumb = img_thumb(outfile)
 	return thumb
 
 def thumb_worker(queue, db_filename, workernum=None):
@@ -41,10 +43,14 @@ def thumb_worker(queue, db_filename, workernum=None):
 		if data:
 			continue
 		
-		if os.path.splitext(src_file)[1] in ['png', 'gif', 'jpg', 'jpeg']:
-			thumb = img_thumb(src_file)
-		else:
-			thumb = video_thumb(src_file)
+		try:
+			if os.path.splitext(src_file)[1].strip('.') in ['png', 'gif', 'jpg', 'jpeg']:
+				thumb = img_thumb(src_file)
+			else:
+				thumb = video_thumb(src_file)
+		except Exception as e:
+			cherrypy.log("Exception on file %s : %s" % (src_file, e), context='THUMB')
+			continue
 		
 		with sqlite3.connect(db_filename) as conn:
 			conn.execute('INSERT OR IGNORE INTO thumbnails(md5, imgdata) VALUES (?,?)', (md5, thumb))
@@ -58,8 +64,8 @@ class ThumbNailer:
 			p.daemon = True
 			p.start()
 		
-	def create(self, ascii_md5, source_file):
-		self.queue.put((ascii_md5, source_file))
+	def create(self, md5, source_file):
+		self.queue.put((md5, os.path.join(image_dir, source_file)))
 
 	def stop(self):
 		for i in range(self.num_procs):

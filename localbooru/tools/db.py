@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS posts (id INTEGER PRIMARY KEY, website TEXT, origid I
 
 THUMB_DB_SCHEMA = '''
 PRAGMA synchronous = OFF
-CREATE TABLE IF NOT EXISTS thumbnails (md5 TEXT PRIMARY KEY, imgdata BLOB);
+CREATE TABLE IF NOT EXISTS thumbnails (md5 BLOB(16) PRIMARY KEY, imgdata BLOB);
 '''
 
 CACHE_DB_SCHEMA = '''
@@ -88,7 +88,7 @@ def generate_cache(inputdb, outputdb):
 	cherrypy.log("Generating cache", context='DATABASE')
 	with inputdb.get() as conn, conn:
 		cur = conn.cursor()
-		cur.execute('SELECT id, website, origid, creation_date, hash, image, width, height, rating, tags FROM posts ORDER BY id')
+		cur.execute('SELECT id, website, origid, creation_date, hash, image, width, height, rating, tags FROM posts ORDER BY id DESC')
 		for row in cur:
 			inputrow += 1
 			subpath = IMAGE_NAME_FUNC(row[5])
