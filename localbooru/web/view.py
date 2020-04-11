@@ -18,7 +18,7 @@ class ViewServer:
 			res = cur.fetchall()
 		if not res:
 			raise cherrypy.HTTPError(status=404)
-		img['url'] = "/imge/%s" % res[0][2]
+		img['url'] = "/image/%s" % res[0][2]
 		img['tags'] = ' '.join(map(lambda x: x[0], res))
 		taglist = []
 		for r in res:
