@@ -1,6 +1,7 @@
 import cherrypy
 
 from . templates import jinja_env
+from localbooru.tools.common import is_image
 
 VIEW_QUERY = '''SELECT tags.name AS tag, posts.hash, posts.image
 FROM tagmap 
@@ -19,6 +20,7 @@ class ViewServer:
 		if not res:
 			raise cherrypy.HTTPError(status=404)
 		img['url'] = "/image/%s" % res[0][2]
+		is_video = not is_image(res[0][2])
 		img['tags'] = ' '.join(map(lambda x: x[0], res))
 		taglist = []
 		for r in res:
@@ -29,4 +31,4 @@ class ViewServer:
 			tag['type'] = 'general'
 			tag['name'] = r[0]
 			taglist.append(tag)
-		return jinja_env.get_template("view.html").render(view_type="post", img=img, taglist=taglist)
+		return jinja_env.get_template("view.html").render(view_type="post", img=img, taglist=taglist, video=is_video)

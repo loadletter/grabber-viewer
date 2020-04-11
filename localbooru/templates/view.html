@@ -5,7 +5,14 @@
             <div>
                 <div id="note-container">
                 </div>
-                <img alt="{{img.tags}}" src="{{img.url}}" id="image">
+                {% if video %}
+					<video controls autoplay muted loop>
+						<source src="{{img.url}}" type="video/mp4">
+						{{img.tags}}
+					</video>
+                {% else %}
+					<img alt="{{img.tags}}" src="{{img.url}}" id="image">
+				{% endif %}
                 <br>
                 <div style="margin-bottom: 1em;">
                     <p id="note-count"></p>

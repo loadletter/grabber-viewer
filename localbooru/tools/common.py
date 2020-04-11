@@ -1,3 +1,4 @@
+import os
 from localbooru import __version__
 
 COMMON_MAGICS = [('\xff\xd8', 'image/jpeg'),
@@ -14,3 +15,6 @@ def magic_mime(head):
 	for m in COMMON_MAGICS:
 		if head.startswith(m[0]):
 			return m[1]
+
+def is_image(filename):
+	return os.path.splitext(filename)[1].strip('.') in ['png', 'gif', 'jpg', 'jpeg']

@@ -10,6 +10,7 @@ from PIL import Image
 from tempfile import mktemp
 
 from . settings import image_dir
+from . common import is_image
 
 THUMB_SIZE = (150, 150)
 
@@ -44,7 +45,7 @@ def thumb_worker(queue, db_filename, workernum=None):
 			continue
 		
 		try:
-			if os.path.splitext(src_file)[1].strip('.') in ['png', 'gif', 'jpg', 'jpeg']:
+			if is_image(src_file):
 				thumb = img_thumb(src_file)
 			else:
 				thumb = video_thumb(src_file)

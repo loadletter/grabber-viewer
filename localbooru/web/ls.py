@@ -3,11 +3,18 @@ import cherrypy
 
 from . templates import jinja_env
 
-LIST_QUERY = '''SELECT posts.id, tags.name AS tag, posts.hash, posts.image
+from localbooru.settings import RESULTS_PER_PAGE
+
+LIST_QUERY = '''SELECT posts.id, tags.name, posts.hash, posts.image
 FROM tagmap 
 JOIN posts ON post = posts.id
 JOIN tags ON tag = tags.id
 ORDER BY posts.id'''
+
+COUNT_QUERY = '''SELECT COUNT(DISTINCT(posts.id))
+FROM tagmap 
+INNER JOIN posts ON post = posts.id
+INNER JOIN tags ON tag = tags.id'''
 
 class ListServer:
 	@cherrypy.expose
@@ -32,6 +39,10 @@ class ListServer:
 					imagepath = p[3]
 				else:
 					post['tags'] += ' %s' % p[1]
+		
+		with cherrypy.tools.db.cache.get() as conn, conn:
+			cur = conn.execute(COUNT_QUERY)
+			postcount = cur.fetchone()
 		
 		pgnav = {}
 		pgnav['current'] = 2
