@@ -345,7 +345,7 @@ div.header ul#navbar {
 }
 
 div.header ul#navbar li {
-  font-size: 120%;
+  font-size: 110%;
   padding: 2px 10px 3px 10px;
   margin: 0;
 }
@@ -476,38 +476,6 @@ div.blocked {
   	text-align: center;
 }
 
-/* Comments */
-div#comment-list > div.post {
-  	float: left;
-  	clear: left;
-  	margin-bottom: 3em;
-	font-size: .850em;
-}
-
-div#comment-list > div.post > div.col1 {
-  	width: 200px;
-  	float: left;
-  	clear: left;
-}
-
-div#comment-list > div.post > div.col2 {
-  	float: left;
-  	width: 50em;
-}
-
-div#comment-list > div.post > div.col2 > div.commentHeader {
-  	margin-bottom: 1em;
-}
-
-div#comment-list > div.post > div.col2 > div.commentHeader > div > span.info {
-  	margin-right: 1em;
-}
-
-div#comment-list > div.post > div.col2 > div.commentHeader > div.tags > span {
-  	margin: 0 0.5em 0 0;
-}
-/*END Comments*/
-
 div#content {
   	padding: 0 20px 30px 20px;
 }
@@ -539,105 +507,6 @@ div#footer > .footer-disabled {
 div#footer > #label {
   	color: #777777;
 }
-/*Forum Start*/
-
-table.forum-container {
-	margin: 0px 0px 3px 0px; 
-	padding: 0px; 
-	width: 100%;
-}
-td.forum-content {
-	margin: 0px;
-	width: 100%;
-	padding: 3px 0px 0px 3px;
-}
-
-td.forum-avatar {
-	width: 160px; 
-	margin: 0px;
-	padding: 3px 0px 0px 0px;
-}
-
-img.avatar-border {
-	max-width: 80px;
-	max-height: 130px;
-	border: 1px solid #d9d9d9;
-}
-div.forum-topic {
-	background: #1c81ff; 
-	padding: 3px 6px 3px 6px; 
-	color: #fff; 
-	font-size: 12px;
-}
-
-div.forum-posted-date {
-	font-size: 10px; 
-	background: transparent;
-}
-div.forum-body {
-	font-size: 13px; 
-	padding: 6px;
-}
-
-div.forum-reply-box {
-	width: 100%; 
-	background: #fafafa; 
-	border: 1px solid #f0f0f0; 
-	font-size: 11px; 
-	padding: 5px;
-}
-
-div.forum-topic-category {
-	color: #444444; 
-	font-size: 12px;
-	font-weight: bold; 
-	margin-bottom: 7px;
-}
-
-div#forum > table th:first-child {
-  	text-align: left;
-}
-
-div#forum > table td:first-child {
-  	text-align: left;
-}
-
-div.forum-notice {
-	padding-top: 3px;
-	font-size: 11px;
-	color: #404040;
-}
-
-a.forum-top-button {
-	background:#fff;
-	border:1px solid #bababa; 
-	padding: 4px; 
-	font-size: 11px; 
-	margin-right: 3px;
-}
-
-a.forum-top-button2 {
-	background:#fff;
-	border:1px solid #bababa; 
-	padding: 4px; 
-	font-size: 11px; 
-}
-
-
-td.replies-count {
-	font-size: 11px; 
-	font-weight: bold; 
-	color: #393939; 
-	width: 75px; 
-	vertical-align: middle; 
-	text-align: center;
-	padding: 10px;
-}
-
-span.second-info {
-	font-size: 11px;
-	color: #878686;
-}
 
 td.generic-padding {
 	padding: 10px;
@@ -645,80 +514,10 @@ td.generic-padding {
 	vertical-align: middle;
 }
 
-td.admin-tools {
-	vertical-align: middle;
-	font-size: 11px;
-	width: 80px;
-}
-
-td.forum-icon-list {
-	padding: 10px;
-	width: 10px;
-	vertical-align: middle;
-}
-
-div.replies-box {
-	width: 100%;
-	background: #fafafa;
-	border: 1px solid #f0f0f0;
-	font-size: 11px; 
-	padding: 5px;
-}
-
-
-
-div.help {
-  	width: 40em;
-  	margin-top: 2em;
-}
-
-div.help a.code {
-  	font-family: monospace;
-}
-
-div.help div.code {
-  	border: 1px dashed green;
-  	margin: 1em 0;
-  	padding: 1em 2em;
-  	background: #EEE;
-  	overflow: hidden;
-  	font-family: monospace;
-}
-
-div.help > div.section {
-  	margin-bottom: 4em;
-}
-
-div.help > div.section > div.section {
-  	margin-bottom: 2em;
-}
-
-div.help h1,
-div.help h2,
-div.help h3,
-div.help h4 {
-  	margin: 0 0 0.5em 0;  	
-}
-
-div.help h4 {
-  	color: #060;
-}
-
 div#info {
   	font-style: italic;
 }
 
-div.mail .received {
-  	color: #060;
-}
-
-div.mail .sent {
-  	color: #600;
-}
-
-div#mail-show div.message {
-  	margin-bottom: 4em;
-}
 
 div#notice {
   	font-size: 1.2em;
@@ -915,7 +714,7 @@ div.sidebar {
 
 div.sidebar li {
   	list-style-type: none;
-  	margin: 0px 0px 1em 0px;
+  	margin: 0px 0px 0.4em 0px;
 }
 
 div.sidebar2 {
@@ -1000,14 +799,6 @@ div#tag-list > a {
   	padding-right: 5px;
 }
 
-div#user-record > table > tbody > tr.positive-record {
-  	background: #EFE;
-}
-
-div#user-record > table > tbody > tr.negative-record {
-  	background: #FEE;
-}
-
 div.tips {
   	background: #d9e6f7; 
   	border-bottom: 1px solid #c9def8; 
@@ -1041,26 +832,4 @@ div.rounded_footer {
 	padding: 5px;
 	font-size: 11px;
 	background: #f9f8f8;
-}
-
-table.forum_user_stats {
-	background: #006ffa;
-	color: #fff;
-	font-size: 12px;
-	padding: 3px;
-	margin: 0px;
-	width: 100%;
-}
-
-td.forum_user {
-	font-size: 14px;
-	text-align: left;
-	vertical-align: middle;
-	width: 1px;
-	white-space: nowrap;
-	padding-right: 10px;
-}
-
-td.forum_user a {
-	color: #fff;
 }
