@@ -29,3 +29,4 @@ application_config = { '/': 	{'tools.auth_basic.on': settings.WEBSERVER_AUTH,
 					'/image': {'tools.gzip.on': False,
 							'tools.staticdir.on': True,
 							'tools.staticdir.dir': image_dir}}
+ 

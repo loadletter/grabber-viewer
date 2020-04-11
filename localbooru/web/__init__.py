@@ -16,6 +16,7 @@ class LocalBooru:
 		cherrypy.config.update(cherrypy_config)
 		self.config = application_config
 		cherrypy.tools.db = LocalbooruDB(db_dir)
+		cherrypy.tools.db.gencache()
 		cherrypy.tools.thumb = ThumbNailer(thumb_db)
 		
 		cherrypy.tree.mount(ListServer(), '/ls', self.config)
