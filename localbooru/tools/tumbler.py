@@ -28,6 +28,7 @@ def video_thumb(src_file):
 	subprocess.call(call_args)
 	with open(outfile, 'rb') as f:
 		thumb = img_thumb(outfile)
+	os.unlink(outfile)
 	return thumb
 
 def thumb_worker(queue, db_filename, workernum=None):
@@ -71,4 +72,3 @@ class ThumbNailer:
 	def stop(self):
 		for i in range(self.num_procs):
 			self.queue.put((None,))
-		

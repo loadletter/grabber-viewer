@@ -1,5 +1,6 @@
 import os.path
 import cherrypy
+import sys
 
 from localbooru import settings
 
@@ -30,3 +31,7 @@ application_config = { '/': 	{'tools.auth_basic.on': settings.WEBSERVER_AUTH,
 							'tools.staticdir.on': True,
 							'tools.staticdir.dir': image_dir}}
  
+
+if sys.version_info[0] < 3:
+	sys.stderr.write("Python 3+ required\n")
+	sys.exit(1)

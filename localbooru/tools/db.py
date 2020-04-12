@@ -81,6 +81,7 @@ class LocalbooruDB:
 
 def generate_cache(inputdb, outputdb):
 	data = []
+	tagdict = {}
 	missing = 0
 	inputrow = 0
 	insertrow = 0
@@ -101,9 +102,18 @@ def generate_cache(inputdb, outputdb):
 			for tag in tlist:
 				tags.append(('', tag))
 			data.append((post, tags))
-	
-	cherrypy.log("Metadata size: %i   Found files: %i   Missing files: %i" % (inputrow, inputrow - missing, missing), context='DATABASE')
+			
+		cherrypy.log("Metadata size: %i   Found files: %i   Missing files: %i" % (inputrow, inputrow - missing, missing), context='CACHE')
 		
+		cur.execute('SELECT hash, type, tag FROM tags')
+		for tag in cur:
+			if tag[0] in tagdict:
+				tagdict[tag[0]].append((tag[1], tag[2]))
+			else:
+				tagdict[tag[0]] = [(tag[1], tag[2]),]
+		
+		cherrypy.log("Tags: %i" % len(tagdict), context='CACHE')
+	
 	tagmap = []
 	for d in data:
 		with outputdb.get() as conn, conn:
@@ -113,8 +123,15 @@ def generate_cache(inputdb, outputdb):
 				existingrow += 1
 				continue
 			postid = d[0][0]
-			cur.executemany('INSERT OR IGNORE INTO tags(type, name) VALUES (?,?)', d[1])
-			for t in d[1]:
+			
+			md5 = binascii.b2a_hex(d[0][4]).decode('ascii')
+			if md5 in tagdict:
+				tagsrc = tagdict[md5]
+			else:
+				tagsrc = d[1]
+				
+			cur.executemany('INSERT OR IGNORE INTO tags(type, name) VALUES (?,?)', tagsrc)
+			for t in tagsrc:
 				cur.execute('SELECT id FROM tags WHERE type = ? AND name = ?', t)
 				res = cur.fetchone()
 				if res:
@@ -124,4 +141,4 @@ def generate_cache(inputdb, outputdb):
 		cur = conn.cursor()
 		cur.executemany('INSERT OR IGNORE INTO tagmap(post, tag) VALUES (?,?)', tagmap)
 		
-	cherrypy.log("Cache generated:  Inserted: %i   Dup: %i" % (insertrow, existingrow), context='DATABASE')
+	cherrypy.log("Cache generated:  Inserted: %i   Dup: %i" % (insertrow, existingrow), context='CACHE')
