@@ -16,9 +16,10 @@ THUMB_SIZE = (150, 150)
 
 def img_thumb(src_file):
 	img = Image.open(src_file)
+	if img.format == 'GIF' and img.mode != 'RGB':
+		img = img.convert('RGB')
 	img.thumbnail(THUMB_SIZE)
 	stream = io.BytesIO()
-	img.convert('RGB')
 	img.save(stream, format='JPEG')
 	return stream.getvalue()
 
