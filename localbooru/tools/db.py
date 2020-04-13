@@ -106,7 +106,8 @@ def generate_cache(inputdb, outputdb):
 		cherrypy.log("Metadata size: %i   Found files: %i   Missing files: %i" % (inputrow, inputrow - missing, missing), context='CACHE')
 		
 		cur.execute('SELECT hash, type, tag FROM tags')
-		for tag in cur:
+		for tagorig in cur:
+			tag = tuple(map(lambda x: x.strip("'"), tagorig))
 			if tag[0] in tagdict:
 				tagdict[tag[0]].append((tag[1], tag[2]))
 			else:

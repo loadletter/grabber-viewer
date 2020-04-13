@@ -51,12 +51,11 @@ def thumb_worker(queue, db_filename, workernum=None):
 				thumb = img_thumb(src_file)
 			else:
 				thumb = video_thumb(src_file)
+			with sqlite3.connect(db_filename) as conn:
+				conn.execute('INSERT OR IGNORE INTO thumbnails(md5, imgdata) VALUES (?,?)', (md5, thumb))
 		except Exception as e:
 			cherrypy.log("Exception on file %s : %s" % (src_file, e), context='THUMB')
 			continue
-		
-		with sqlite3.connect(db_filename) as conn:
-			conn.execute('INSERT OR IGNORE INTO thumbnails(md5, imgdata) VALUES (?,?)', (md5, thumb))
 		
 class ThumbNailer:
 	def __init__(self, db_filename):
