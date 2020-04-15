@@ -11,6 +11,7 @@ if settings.IMAGE_DIR:
 else:
 	image_dir = os.path.join(data_dir, 'images')
 db_dir = os.path.join(data_dir, 'db')
+tags_dir = os.path.join(data_dir, 'tags')
 thumb_db = os.path.join(db_dir, 'thumb.sqlite3')
 
 checkpassword = cherrypy.lib.auth_basic.checkpassword_dict(settings.USERS)

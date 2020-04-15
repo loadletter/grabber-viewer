@@ -6,7 +6,7 @@ import cherrypy
 from contextlib import contextmanager
 
 from localbooru.settings import IMAGE_NAME_FUNC
-from . settings import image_dir
+from . settings import image_dir, tags_dir
 
 DATABASES = ['metadata', 'thumb', 'cache']
 
@@ -77,7 +77,33 @@ class LocalbooruDB:
 		generate_cache(self.metadata, self.cache)
 	
 
-
+def generate_tag_types():
+	tags_f = "tags.txt"
+	tagtype_f = "tag-types.txt"
+	cherrypy.log("Loading tags", context='TAGLOAD')
+	dirlist = os.listdir(tags_dir)
+	dirlist.sort(reverse=True)
+	tags = {}
+	for d in dirlist:
+		tagtypes = {}
+		tagcount = 0
+		fn = os.path.join(tags_dir, d)
+		if not (os.path.isdir(fn) and os.path.isfile(os.path.join(fn, tags_f)) and os.path.isfile(os.path.join(fn, tagtype_f))):
+			cherrypy.log("Invalid tag directory %s" % d, context='TAGLOAD')
+			continue
+		with open(os.path.join(fn, tagtype_f),'r') as f:
+			for line in f:
+				spl = line.strip().split(',', 1)
+				if len(spl) == 2:
+					tagtypes[spl[0]] = spl[1]
+		with open(os.path.join(fn, tags_f),'r') as f:
+			for line in f:
+				spl = line.strip().rsplit(',', 1)
+				if len(spl) == 2 and spl[1] in tagtypes:
+					tags[spl[0]] = tagtypes[spl[1]]
+					tagcount += 1
+		cherrypy.log("Loaded tags from %s: %i" % (d, tagcount), context='TAGLOAD')
+	return tags
 
 def generate_cache(inputdb, outputdb):
 	data = []
@@ -85,6 +111,7 @@ def generate_cache(inputdb, outputdb):
 	inputrow = 0
 	insertrow = 0
 	existingrow = 0
+	tag_types = generate_tag_types()
 	cherrypy.log("Generating cache", context='DATABASE')
 	with inputdb.get() as conn, conn:
 		cur = conn.cursor()
@@ -99,9 +126,12 @@ def generate_cache(inputdb, outputdb):
 			tags = []
 			tlist = row[9].strip().split()
 			for tag in tlist:
-				tags.append(('', tag))
+				if tag in tag_types:
+					tagt = tag_types[tag]
+				else:
+					tagt = ''
+				tags.append((tagt, tag))
 			data.append((post, tags))
-			
 		cherrypy.log("Metadata size: %i   Found files: %i   Missing files: %i" % (inputrow, inputrow - missing, missing), context='CACHE')
 	
 	tagmap = []
@@ -113,13 +143,8 @@ def generate_cache(inputdb, outputdb):
 				existingrow += 1
 				continue
 			postid = d[0][0]
-			
-			md5 = binascii.b2a_hex(d[0][4]).decode('ascii')
-			if md5 in tagdict:
-				tagsrc = tagdict[md5]
-			else:
-				tagsrc = d[1]
-				
+
+			tagsrc = d[1]
 			cur.executemany('INSERT OR IGNORE INTO tags(type, name) VALUES (?,?)', tagsrc)
 			for t in tagsrc:
 				cur.execute('SELECT id FROM tags WHERE type = ? AND name = ?', t)
