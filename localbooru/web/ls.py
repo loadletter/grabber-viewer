@@ -1,6 +1,7 @@
 import binascii
 import math
 import cherrypy
+import urllib
 
 from . templates import jinja_env
 
@@ -51,6 +52,13 @@ class ListServer:
 				else:
 					post['tags'] += ' %s' % p[1]
 		
+		keepargs = dict(kwargs)
+		if 'page' in keepargs:
+			keepargs.pop('page')
+		newargs = urllib.parse.urlencode(keepargs)
+		if newargs:
+			newargs = '&' + newargs
+		
 		with cherrypy.tools.db.cache.get() as conn, conn:
 			cur = conn.execute(COUNT_QUERY)
 			postcount = cur.fetchone()
@@ -59,8 +67,8 @@ class ListServer:
 		total_pg = math.ceil(postcount[0] / RESULTS_PER_PAGE)
 		pgnav['total'] = total_pg
 		pgnav['current'] = pagearg
-		pgnav['firsturl'] = "/ls/"
-		base_url = "/ls/?page=%i"
+		pgnav['firsturl'] = "/ls/" + newargs.lstrip('&')
+		base_url = "/ls/?page=%i" + newargs
 		pgnav['nexturl'] = base_url % (pagearg + 1)
 		pgnav['backurl'] = base_url % (pagearg - 1)
 		pgnav['lasturl'] = base_url % total_pg
