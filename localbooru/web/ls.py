@@ -1,4 +1,5 @@
 import binascii
+import math
 import cherrypy
 
 from . templates import jinja_env
@@ -6,10 +7,11 @@ from . templates import jinja_env
 from localbooru.settings import RESULTS_PER_PAGE
 
 LIST_QUERY = '''SELECT posts.id, tags.name, posts.hash, posts.image
-FROM tagmap 
-JOIN posts ON post = posts.id
-JOIN tags ON tag = tags.id
-ORDER BY posts.id'''
+FROM
+(SELECT id, hash, image FROM posts ORDER BY id LIMIT ?,?) AS p
+INNER JOIN tagmap ON tagmap.post = p.id
+INNER JOIN posts ON post = posts.id
+INNER JOIN tags ON tagmap.tag = tags.id'''
 
 COUNT_QUERY = '''SELECT COUNT(DISTINCT(posts.id))
 FROM tagmap 
@@ -20,8 +22,17 @@ class ListServer:
 	@cherrypy.expose
 	def index(self, **kwargs):
 		postlist = []
+		if 'page' in kwargs:
+			pagearg = int(kwargs['page']) 
+		else:
+			pagearg = 1
+		
+		dbpagearg = pagearg
+		if dbpagearg > 0:
+			dbpagearg -= 1
+		
 		with cherrypy.tools.db.cache.get() as conn, conn:
-			cur = conn.execute(LIST_QUERY)
+			cur = conn.execute(LIST_QUERY, (dbpagearg * RESULTS_PER_PAGE, RESULTS_PER_PAGE))
 			currpost = None
 			post = {}
 			for p in cur:
@@ -45,13 +56,15 @@ class ListServer:
 			postcount = cur.fetchone()
 		
 		pgnav = {}
-		pgnav['current'] = 2
-		pgnav['total'] = 5
-		pgnav['nexturl'] = '/ls/3'
-		pgnav['backurl'] = '/ls/1'
-		pgnav['firsturl'] = '/ls/1'
-		pgnav['lasturl'] = '/ls/5'
+		total_pg = math.ceil(postcount[0] / RESULTS_PER_PAGE)
+		pgnav['total'] = total_pg
+		pgnav['current'] = pagearg
+		pgnav['firsturl'] = "/ls/"
+		base_url = "/ls/?page=%i"
+		pgnav['nexturl'] = base_url % (pagearg + 1)
+		pgnav['backurl'] = base_url % (pagearg - 1)
+		pgnav['lasturl'] = base_url % total_pg
 		pglist = []
-		for i in range(1, 6):
-			pglist.append({'number': i, 'url' : '/ls/%i' % i})
+		for i in range(1, total_pg + 1):
+			pglist.append({'number': i, 'url' : base_url % i})
 		return jinja_env.get_template("list.html").render(paginator=pgnav, pagelist=pglist, view_type="list", postlist=postlist)
