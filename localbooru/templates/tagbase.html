@@ -4,11 +4,12 @@
     <div class="sidebar">
         <div style="margin-bottom: 1em;">
             <h5>Search</h5>
-            <form action="index.php?page=search" method="post">
+            <form action="/ls/" method="post">
                 <div>
-                    <input id="tags" name="tags" style="width: 142px;" type="text">
+                    <input id="tags" name="search" style="width: 142px;" type="text">
                     <br>
                     <input name="commit" style="margin-top: 3px; background: #fff; border: 1px solid #dadada; width: 154px;" value="Search" type="submit">
+                    <input name="new" type="hidden">
                 </div>
             </form>
             <small>(Supports wildcard *)</small>

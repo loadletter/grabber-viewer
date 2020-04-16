@@ -94,6 +94,10 @@ class ListServer:
 			pagearg = int(kwargs['page']) 
 		else:
 			pagearg = 1
+			
+		if 'new' in kwargs:
+			kwargs.pop('new')
+			pagearg = 1
 		
 		dbpagearg = pagearg
 		if dbpagearg > 0:
