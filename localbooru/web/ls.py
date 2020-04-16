@@ -7,19 +7,84 @@ from . templates import jinja_env
 
 from localbooru.settings import RESULTS_PER_PAGE
 
-LIST_QUERY = '''SELECT posts.id, tags.name, posts.hash, posts.image
-FROM
-(SELECT id, hash, image FROM posts ORDER BY id LIMIT ?,?) AS p
-INNER JOIN tagmap ON tagmap.post = p.id
-INNER JOIN posts ON post = posts.id
-INNER JOIN tags ON tagmap.tag = tags.id
-%s'''
+TAG_CTE='''WITH full_cte(postid, tagname) AS
+(
+	WITH positive_cte(postid, tagname)  AS
+	(
+		SELECT posts.id, tags.name
+		FROM tagmap 
+		INNER JOIN posts ON post = posts.id
+		INNER JOIN tags ON tag = tags.id
+		%s
+	)
+	SELECT postid, count(tagname) as cnt FROM positive_cte
+	%s
+	GROUP BY postid
+	%s
+)
+'''
 
-COUNT_QUERY = '''SELECT COUNT(DISTINCT(posts.id))
-FROM tagmap 
+NEGATIVE_CTE='''
+	WHERE postid NOT IN 
+	(
+		SELECT posts.id
+		FROM tagmap 
+		INNER JOIN posts ON post = posts.id
+		INNER JOIN tags ON tag = tags.id
+		%s
+	)
+	'''
+
+LIST_QUERY = '''
+SELECT posts.id, tags.name, posts.hash, posts.image
+FROM
+(SELECT postid FROM full_cte ORDER BY postid LIMIT ?,?) AS p
+INNER JOIN tagmap ON tagmap.post = p.postid
 INNER JOIN posts ON post = posts.id
-INNER JOIN tags ON tag = tags.id
-%s'''
+INNER JOIN tags ON tagmap.tag = tags.id'''
+
+COUNT_QUERY = '''
+SELECT COUNT(DISTINCT(postid)) FROM full_cte'''
+
+def build_cte(positive_tags=[], negative_tags=[]):
+	pos_tags = ''
+	pos_args = []
+	pos_count = ''
+	if positive_tags:
+		pos_tags += 'WHERE '
+		for t in positive_tags:
+			prefix = 'OR ' if pos_tags.endswith('? ') else ''
+			pos_tags +=  prefix + 'tags.name = ? '
+			pos_args.append(t)
+		pos_count = 'HAVING cnt = %i' % len(positive_tags)
+	
+	neg_tags = ''
+	neg_args = []
+	neg_query = ''
+	if negative_tags:
+		neg_tags += 'WHERE '
+		for nt in negative_tags:
+			prefix = 'OR ' if neg_tags.endswith('? ') else ''
+			neg_tags +=  prefix + 'tags.name = ? '
+			neg_args.append(nt)
+		neg_query = NEGATIVE_CTE % neg_tags
+	
+	cte = TAG_CTE % (pos_tags, neg_query, pos_count)
+	cte_args = tuple(pos_args) + tuple(neg_args)
+	
+	return (cte, cte_args)
+	
+def build_search_query(page, res_per_page, positive_tags, negative_tags):
+	cte, cte_args = build_cte(positive_tags, negative_tags)
+	full_query = cte + LIST_QUERY
+	full_args = cte_args + (page, res_per_page)
+	return (full_query, full_args)
+
+def build_count_query(positive_tags, negative_tags):
+	cte, cte_args = build_cte(positive_tags, negative_tags)
+	full_query = cte + COUNT_QUERY
+	return (full_query, cte_args)
+
 
 class ListServer:
 	@cherrypy.expose
@@ -34,26 +99,20 @@ class ListServer:
 		if dbpagearg > 0:
 			dbpagearg -= 1
 		
-		searchsql = ''
-		searchargs = []
+		searchpos = []
+		searchneg = []
 		if 'search' in kwargs:
 			parsedsearch = urllib.parse.unquote_plus(kwargs['search']).strip().split(' ')
-			if parsedsearch:
-				searchsql = 'WHERE '
 			for el in parsedsearch:
-				prefix = 'AND ' if searchsql.endswith('? ') else ''
-				if ':' in el:
-					pass
-				elif el.startswith('-'):
-					searchsql += prefix + 'tags.name <> ? '
-					searchargs.append(el)
+				if el.startswith('-'):
+					searchneg.append(el.strip('-'))
 				else:
-					searchsql += prefix + 'tags.name = ? '
-					searchargs.append(el)	
-		searchargs = tuple(searchargs)
+					searchpos.append(el)	
+
+		search_query, search_args = build_search_query(dbpagearg * RESULTS_PER_PAGE, RESULTS_PER_PAGE, searchpos, searchneg)
 		
 		with cherrypy.tools.db.cache.get() as conn, conn:
-			cur = conn.execute(LIST_QUERY % searchsql, (dbpagearg * RESULTS_PER_PAGE, RESULTS_PER_PAGE) + searchargs)
+			cur = conn.execute(search_query, search_args)
 			currpost = None
 			post = {}
 			for p in cur:
@@ -79,8 +138,9 @@ class ListServer:
 		if newargs:
 			newargs = '&' + newargs
 		
+		count_query, count_args = build_count_query(searchpos, searchneg)
 		with cherrypy.tools.db.cache.get() as conn, conn:
-			cur = conn.execute(COUNT_QUERY % searchsql, searchargs)
+			cur = conn.execute(count_query, count_args)
 			postcount = cur.fetchone()
 		
 		pgnav = {}
