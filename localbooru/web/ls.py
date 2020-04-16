@@ -152,11 +152,11 @@ class ListServer:
 		pgnav['total'] = total_pg
 		pgnav['current'] = pagearg
 		pgnav['firsturl'] = "/ls/" + newargs.lstrip('&')
-		base_url = "/ls/?page=%i" + newargs
-		pgnav['nexturl'] = base_url % (pagearg + 1)
-		pgnav['backurl'] = base_url % (pagearg - 1)
-		pgnav['lasturl'] = base_url % total_pg
+		base_url = "/ls/?page={}" + newargs
+		pgnav['nexturl'] = base_url.format(pagearg + 1)
+		pgnav['backurl'] = base_url.format(pagearg - 1)
+		pgnav['lasturl'] = base_url.format(total_pg)
 		pglist = []
 		for i in range(1, total_pg + 1):
-			pglist.append({'number': i, 'url' : base_url % i})
+			pglist.append({'number': i, 'url' : base_url.format(i)})
 		return jinja_env.get_template("list.html").render(paginator=pgnav, pagelist=pglist, view_type="list", postlist=postlist)
