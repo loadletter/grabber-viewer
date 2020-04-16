@@ -9,10 +9,11 @@ from localbooru.settings import RESULTS_PER_PAGE
 
 LIST_QUERY = '''SELECT posts.id, tags.name, posts.hash, posts.image
 FROM
-(SELECT id, hash, image FROM posts %s ORDER BY id LIMIT ?,?) AS p
+(SELECT id, hash, image FROM posts ORDER BY id LIMIT ?,?) AS p
 INNER JOIN tagmap ON tagmap.post = p.id
 INNER JOIN posts ON post = posts.id
-INNER JOIN tags ON tagmap.tag = tags.id'''
+INNER JOIN tags ON tagmap.tag = tags.id
+%s'''
 
 COUNT_QUERY = '''SELECT COUNT(DISTINCT(posts.id))
 FROM tagmap 
@@ -34,7 +35,7 @@ class ListServer:
 			dbpagearg -= 1
 		
 		searchsql = ''
-		searchargs = ()
+		searchargs = []
 		if 'search' in kwargs:
 			parsedsearch = urllib.parse.unquote_plus(kwargs['search']).strip().split(' ')
 			if parsedsearch:
@@ -49,9 +50,10 @@ class ListServer:
 				else:
 					searchsql += prefix + 'tags.name = ? '
 					searchargs.append(el)	
+		searchargs = tuple(searchargs)
 		
 		with cherrypy.tools.db.cache.get() as conn, conn:
-			cur = conn.execute(LIST_QUERY % searchsql, searchargs + (dbpagearg * RESULTS_PER_PAGE, RESULTS_PER_PAGE))
+			cur = conn.execute(LIST_QUERY % searchsql, (dbpagearg * RESULTS_PER_PAGE, RESULTS_PER_PAGE) + searchargs)
 			currpost = None
 			post = {}
 			for p in cur:
