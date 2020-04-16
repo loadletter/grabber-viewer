@@ -9,7 +9,7 @@ from localbooru.settings import RESULTS_PER_PAGE
 
 LIST_QUERY = '''SELECT posts.id, tags.name, posts.hash, posts.image
 FROM
-(SELECT id, hash, image FROM posts ORDER BY id LIMIT ?,?) AS p
+(SELECT id, hash, image FROM posts %s ORDER BY id LIMIT ?,?) AS p
 INNER JOIN tagmap ON tagmap.post = p.id
 INNER JOIN posts ON post = posts.id
 INNER JOIN tags ON tagmap.tag = tags.id'''
@@ -17,7 +17,8 @@ INNER JOIN tags ON tagmap.tag = tags.id'''
 COUNT_QUERY = '''SELECT COUNT(DISTINCT(posts.id))
 FROM tagmap 
 INNER JOIN posts ON post = posts.id
-INNER JOIN tags ON tag = tags.id'''
+INNER JOIN tags ON tag = tags.id
+%s'''
 
 class ListServer:
 	@cherrypy.expose
@@ -32,8 +33,25 @@ class ListServer:
 		if dbpagearg > 0:
 			dbpagearg -= 1
 		
+		searchsql = ''
+		searchargs = ()
+		if 'search' in kwargs:
+			parsedsearch = urllib.parse.unquote_plus(kwargs['search']).strip().split(' ')
+			if parsedsearch:
+				searchsql = 'WHERE '
+			for el in parsedsearch:
+				prefix = 'AND ' if searchsql.endswith('? ') else ''
+				if ':' in el:
+					pass
+				elif el.startswith('-'):
+					searchsql += prefix + 'tags.name <> ? '
+					searchargs.append(el)
+				else:
+					searchsql += prefix + 'tags.name = ? '
+					searchargs.append(el)	
+		
 		with cherrypy.tools.db.cache.get() as conn, conn:
-			cur = conn.execute(LIST_QUERY, (dbpagearg * RESULTS_PER_PAGE, RESULTS_PER_PAGE))
+			cur = conn.execute(LIST_QUERY % searchsql, searchargs + (dbpagearg * RESULTS_PER_PAGE, RESULTS_PER_PAGE))
 			currpost = None
 			post = {}
 			for p in cur:
@@ -60,7 +78,7 @@ class ListServer:
 			newargs = '&' + newargs
 		
 		with cherrypy.tools.db.cache.get() as conn, conn:
-			cur = conn.execute(COUNT_QUERY)
+			cur = conn.execute(COUNT_QUERY % searchsql, searchargs)
 			postcount = cur.fetchone()
 		
 		pgnav = {}
