@@ -95,19 +95,22 @@ class ListServer:
 		else:
 			pagearg = 1
 			
-		if 'new' in kwargs:
-			kwargs.pop('new')
+		if 'commit' in kwargs:
+			kwargs.pop('commit')
 			pagearg = 1
 		
 		dbpagearg = pagearg
 		if dbpagearg > 0:
 			dbpagearg -= 1
 		
+		searchbar = ''
+		
 		searchpos = []
 		searchneg = []
 		if 'search' in kwargs:
-			parsedsearch = urllib.parse.unquote_plus(kwargs['search']).strip().split(' ')
-			for el in parsedsearch:
+			parsedsearch = urllib.parse.unquote_plus(kwargs['search']).strip()
+			searchbar = parsedsearch
+			for el in parsedsearch.split(' '):
 				if el.startswith('-'):
 					searchneg.append(el.strip('-'))
 				else:
@@ -159,4 +162,4 @@ class ListServer:
 		pglist = []
 		for i in range(1, total_pg + 1):
 			pglist.append({'number': i, 'url' : base_url.format(i)})
-		return jinja_env.get_template("list.html").render(paginator=pgnav, pagelist=pglist, view_type="list", postlist=postlist)
+		return jinja_env.get_template("list.html").render(paginator=pgnav, pagelist=pglist, view_type="list", postlist=postlist, searchbar=searchbar)
