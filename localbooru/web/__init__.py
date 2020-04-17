@@ -4,6 +4,7 @@ from . view import ViewServer
 from . ls import ListServer
 from . root import RootServer
 from . thumb import ThumbServer
+from . complete import CompletionServer
 
 from localbooru.tools.db import LocalbooruDB
 from localbooru.tools.tumbler import ThumbNailer
@@ -22,6 +23,7 @@ class LocalBooru:
 		cherrypy.tree.mount(ListServer(), '/ls', self.config)
 		cherrypy.tree.mount(ViewServer(), '/view', self.config)
 		cherrypy.tree.mount(ThumbServer(), '/thumb', self.config)
+		cherrypy.tree.mount(CompletionServer(), '/complete', self.config)
 		cherrypy.engine.subscribe('stop', self.stop)
 		
 	def start(self):        
