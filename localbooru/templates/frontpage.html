@@ -6,6 +6,10 @@
 		<link rel="SHORTCUT ICON" href="static/icons/favicon.png">
 		<title>Localbooru</title>
 		<link rel="stylesheet" type="text/css" media="screen" href="static/default.css" title="default">
+		<script src="static/complete.js"></script>
+		<script>
+			window.onload=function() {autocomplete(document.getElementById("tags"), '/complete/?tag=')};
+		</script> 
 	</head>
 	<body style="font-size: 80%;">
 		<br><br><br>
@@ -16,10 +20,12 @@
 					<a href="/queue">Queue</a>
 					<a href="/logout">Logout</a>
 				</div>
-				<form action="/ls/" method="get">
+				<form action="/ls/" method="get" autocomplete="off">
 					<center>
 						<div style>
+							<div class="autocomplete">
 							<input id="tags" name="search" size="38" type="text"><br>
+							</div>
 							<input name="commit" value="Search" type="submit">
 						</div>
 					</center>

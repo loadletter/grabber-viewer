@@ -6,6 +6,10 @@
 	<title>{% block title %}{% endblock %} - Localbooru</title>
 	<link rel="stylesheet" type="text/css" media="screen" href="/static/default.css" title="default">
 	<link rel="SHORTCUT ICON" href="/static/icons/favicon.png">
+	<script src="static/complete.js"></script>
+	<script>
+		window.onload=function() {autocomplete(document.getElementById("tags"), '/complete/?tag=')};
+	</script> 
 </head>
 <body>
 	<div class="header center">
