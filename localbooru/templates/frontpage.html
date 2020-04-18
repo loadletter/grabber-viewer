@@ -20,15 +20,13 @@
 					<a href="/queue">Queue</a>
 					<a href="/logout">Logout</a>
 				</div>
-				<form action="/ls/" method="get" autocomplete="off">
-					<center>
-						<div style>
-							<div class="autocomplete">
-							<input id="tags" name="search" size="38" type="text"><br>
-							</div>
-							<input name="commit" value="Search" type="submit">
+				<form action="/ls/" method="get" autocomplete="off" id="searchform">
+					<div style="text-align:center">
+						<div class="autocomplete">
+						<input id="tags" name="search" size="38" type="text"><br>
 						</div>
-					</center>
+						<input name="commit" value="Search" type="submit">
+					</div>
 				</form>
 				<div style="font-size: 80%; margin-bottom: 2em;">
 					<p>Serving {{postcount}} posts - Running Localbooru alpha {{version}}</p><br>

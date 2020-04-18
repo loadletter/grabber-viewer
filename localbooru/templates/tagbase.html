@@ -4,14 +4,12 @@
     <div class="sidebar">
         <div style="margin-bottom: 1em;">
             <h5>Search</h5>
-            <form action="/ls/" method="get">
-                <div>
+            <form action="/ls/" method="get" autocomplete="off"  id="searchform">
 					<div class="autocomplete">
                     <input id="tags" name="search" style="width: 142px;" type="text" value="{{searchbar|e}}">
                     </div>
                     <br>
                     <input name="commit" style="margin-top: 3px; background: #fff; border: 1px solid #dadada; width: 154px;" value="Search" type="submit">
-                </div>
             </form>
         </div>
         <div id="blacklisted-sidebar" style="display: none;">

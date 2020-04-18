@@ -2,6 +2,7 @@ function autocomplete(inp, url) {
 	var currentFocus;
     var inputEl;
     var textStartPos;
+    var preventEnter;
 
     if (!inp) {
         console.log("No input to autocomplete");
@@ -57,11 +58,14 @@ function autocomplete(inp, url) {
             });
             a.appendChild(b);
 		}
+        
+        preventEnter = true;
 	}
 	
 	function onInput () {
 		var val = this.value;
 		if (!val) {
+            closeAllLists();
 			return false;
 		}
         inputEl = this;
@@ -112,11 +116,18 @@ function autocomplete(inp, url) {
 				addActive(x);
 			} else if (e.keyCode == 13) {
 				/*If the ENTER key is pressed, prevent the form from being submitted,*/
-				e.preventDefault();
+				if(preventEnter) {
+                    e.preventDefault();
+                }
 				if (currentFocus > -1) {
 					/*and simulate a click on the "active" item:*/
 					if (x) x[currentFocus].click();
-				}
+				} else {
+                    var form = document.getElementById("searchform");
+                    if (form) {
+                        form.submit();
+                    }
+                }
 			}
 	});
 	function addActive(x) {
@@ -128,6 +139,7 @@ function autocomplete(inp, url) {
 		if (currentFocus < 0) currentFocus = (x.length - 1);
 		/*add class "autocomplete-active":*/
 		x[currentFocus].classList.add("autocomplete-active");
+        preventEnter = true;
 	}
 	function removeActive(x) {
 		/*a function to remove the "active" class from all autocomplete items:*/
@@ -144,6 +156,7 @@ function autocomplete(inp, url) {
 			x[i].parentNode.removeChild(x[i]);
 			}
 		}
+        preventEnter = false;
 	}
 	/*execute a function when someone clicks in the document:*/
 	document.addEventListener("click", function (e) {
