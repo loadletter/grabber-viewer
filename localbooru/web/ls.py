@@ -85,7 +85,15 @@ def build_count_query(positive_tags, negative_tags):
 	full_query = cte + COUNT_QUERY
 	return (full_query, cte_args)
 
-
+def multi_tag_sort(y):
+	base = 0
+	multiplier = 0
+	if y['type'] in ['general', 'meta']:
+		multiplier = 1000
+	if y['name']:
+		base = (ord(y['name'][0]) * 1000) + ord(y['name'][1])
+	return base * multiplier
+	
 class ListServer:
 	@cherrypy.expose
 	def index(self, **kwargs):
@@ -146,7 +154,7 @@ class ListServer:
 				tagset.add((p[1], tag_type))
 		
 		taglist = list(map(lambda x: {'name' : x[0], 'type' : x[1]}, tagset))
-		taglist.sort(key=lambda x: x['type'] in ['general', 'meta'])
+		taglist.sort(key=multi_tag_sort)
 		
 		keepargs = dict(kwargs)
 		if 'page' in keepargs:
