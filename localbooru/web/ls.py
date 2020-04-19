@@ -36,7 +36,7 @@ NEGATIVE_CTE='''
 	'''
 
 LIST_QUERY = '''
-SELECT posts.id, tags.name, posts.hash, posts.image
+SELECT posts.id, tags.name, posts.hash, posts.image, tags.type
 FROM
 (SELECT postid FROM full_cte ORDER BY postid LIMIT ?,?) AS p
 INNER JOIN tagmap ON tagmap.post = p.postid
@@ -120,6 +120,7 @@ class ListServer:
 		
 		with cherrypy.tools.db.cache.get() as conn, conn:
 			cur = conn.execute(search_query, search_args)
+			tagset = set()
 			currpost = None
 			post = {}
 			for p in cur:
@@ -137,6 +138,15 @@ class ListServer:
 					imagepath = p[3]
 				else:
 					post['tags'] += ' %s' % p[1]
+					
+				if p[4]:
+					tag_type = p[4]
+				else:
+					tag_type = 'general'
+				tagset.add((p[1], tag_type))
+		
+		taglist = list(map(lambda x: {'name' : x[0], 'type' : x[1]}, tagset))
+		taglist.sort(key=lambda x: x['type'] in ['general', 'meta'])
 		
 		keepargs = dict(kwargs)
 		if 'page' in keepargs:
@@ -162,4 +172,4 @@ class ListServer:
 		pglist = []
 		for i in range(1, total_pg + 1):
 			pglist.append({'number': i, 'url' : base_url.format(i)})
-		return jinja_env.get_template("list.html").render(paginator=pgnav, pagelist=pglist, view_type="list", postlist=postlist, searchbar=searchbar)
+		return jinja_env.get_template("list.html").render(paginator=pgnav, pagelist=pglist, view_type="list", postlist=postlist, searchbar=searchbar, taglist=taglist)
