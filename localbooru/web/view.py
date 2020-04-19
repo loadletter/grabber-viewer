@@ -3,7 +3,7 @@ import cherrypy
 from . templates import jinja_env
 from localbooru.tools.common import is_image
 
-VIEW_QUERY = '''SELECT tags.name, tags.type, posts.hash, posts.image
+VIEW_QUERY = '''SELECT tags.name, tags.type, posts.hash, posts.image, (SELECT count(*) FROM tagmap WHERE tagmap.tag = tags.id) as tagcount
 FROM tagmap 
 JOIN posts ON post = posts.id
 JOIN tags ON tag = tags.id
@@ -31,6 +31,7 @@ class ViewServer:
 			else:
 				tag['type'] = 'general'
 			tag['name'] = r[0]
+			tag['count'] = r[4]
 			taglist.append(tag)
 		taglist.sort(key=lambda x: x['type'] in ['general', 'meta'])
 		return jinja_env.get_template("view.html").render(view_type="post", img=img, taglist=taglist, video=is_video)
