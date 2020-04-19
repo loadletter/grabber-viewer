@@ -7,6 +7,8 @@ from . templates import jinja_env
 
 from localbooru.settings import RESULTS_PER_PAGE
 
+MAX_PAGES=10
+
 TAG_CTE='''WITH full_cte(postid, tagname) AS
 (
 	WITH positive_cte(postid, tagname)  AS
@@ -198,6 +200,15 @@ class ListServer:
 		pgnav['backurl'] = base_url.format(pagearg - 1)
 		pgnav['lasturl'] = base_url.format(total_pg)
 		pglist = []
-		for i in range(1, total_pg + 1):
+		
+		pg_start = pagearg
+		pg_end = total_pg
+		if (pg_end - pg_start) > MAX_PAGES:
+			pg_end = pg_start + MAX_PAGES
+			
+		while pg_start > 1 and (pg_end - pg_start) < MAX_PAGES:
+			pg_start -= 1
+		
+		for i in range(pg_start, pg_end + 1):
 			pglist.append({'number': i, 'url' : base_url.format(i)})
 		return jinja_env.get_template("list.html").render(paginator=pgnav, pagelist=pglist, view_type="list", postlist=postlist, searchbar=searchbar, taglist=taglist)
