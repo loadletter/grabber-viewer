@@ -26,9 +26,6 @@ class ViewServer:
 		taglist = []
 		for r in res:
 			tag = {}
-			tag['addurl'] = ''
-			tag['removeurl'] = ''
-			tag['searchurl'] = ''
 			if r[1]:
 				tag['type'] = r[1]
 			else:

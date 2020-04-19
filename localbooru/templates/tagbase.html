@@ -23,9 +23,9 @@
 
             <ul id="tag-sidebar">
 			{% for tag in taglist %}
-                <li class="tag-type-{{tag.type}}"><a href="#" onclick="document.location={{tag.addurl|e}}'; return false;">+</a>
-                    <a href="#" onclick="document.location='{{tag.removeurl|e}}'; return false;">-</a>
-                    <a href="{{tag.searchurl|e}}">{{tag.name}}</a> <span style="color: #a0a0a0;">{{tag.count}}</span>
+                <li class="tag-type-{{tag.type|e}}"><a href="#" onclick="addTag(this);">+</a>
+                    <a href="#" onclick="addTag(this);">-</a>
+                    <a href="/ls/?search={{tag.name|e}}">{{tag.name|e}}</a> <span style="color: #a0a0a0;">{{tag.count}}</span>
                 </li>
             {% endfor %}
                 <li>

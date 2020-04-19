@@ -9,6 +9,18 @@
 	<script src="static/complete.js"></script>
 	<script>
 		window.onload=function() {autocomplete(document.getElementById("tags"), '/complete/?tag=')};
+		function addTag(e) {
+			var searchinput = document.getElementById("tags")
+			if(!e || !searchinput) {
+				return false;
+			}
+			var tagname = e.parentElement.lastElementChild.previousElementSibling.text;
+			if (e.text == "-") {
+				searchinput.value = searchinput.value + ' -' + tagname;
+			} else {
+				searchinput.value = searchinput.value + ' ' + tagname;
+			}
+		}
 	</script> 
 </head>
 <body>
