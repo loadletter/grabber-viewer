@@ -24,6 +24,8 @@ PRAGMA synchronous = OFF
 CREATE TABLE IF NOT EXISTS posts (id INTEGER PRIMARY KEY, website TEXT, origid INTEGER, creation_date datetime DEFAULT NULL, hash BLOB(16) UNIQUE NOT NULL, image VARCHAR(255) DEFAULT NULL, rating text, height INTEGER unsigned default '0', width INTEGER unsigned default '0');
 CREATE TABLE IF NOT EXISTS tags (id INTEGER PRIMARY KEY, name TEXT, type TEXT, UNIQUE(name, type) ON CONFLICT ABORT);
 CREATE TABLE IF NOT EXISTS tagmap (post INTEGER, tag INTEGER, PRIMARY KEY (post, tag));
+CREATE INDEX IF NOT EXISTS tagmap_post_index ON tagmap (post);
+CREATE INDEX IF NOT EXISTS tagmap_tag_index ON tagmap (tag);
 '''
 
 

@@ -35,7 +35,7 @@ NEGATIVE_CTE='''
 	)
 	'''
 
-LIST_QUERY = '''
+LIST_QUERY_CTE = '''
 SELECT posts.id, tags.name, posts.hash, posts.image, tags.type
 FROM
 (SELECT postid FROM full_cte ORDER BY postid LIMIT ?,?) AS p
@@ -43,8 +43,21 @@ INNER JOIN tagmap ON tagmap.post = p.postid
 INNER JOIN posts ON post = posts.id
 INNER JOIN tags ON tagmap.tag = tags.id'''
 
-COUNT_QUERY = '''
+LIST_QUERY_NOARGS = '''
+SELECT posts.id, tags.name, posts.hash, posts.image, tags.type
+FROM
+(SELECT id FROM posts ORDER BY id LIMIT ?,?) AS p
+INNER JOIN tagmap ON tagmap.post = p.id
+INNER JOIN posts ON post = posts.id
+INNER JOIN tags ON tagmap.tag = tags.id'''
+
+
+COUNT_QUERY_CTE = '''
 SELECT COUNT(DISTINCT(postid)) FROM full_cte'''
+
+COUNT_QUERY_NOARGS = '''
+SELECT COUNT(id) FROM posts'''
+
 
 def build_cte(positive_tags=[], negative_tags=[]):
 	pos_tags = ''
@@ -75,14 +88,18 @@ def build_cte(positive_tags=[], negative_tags=[]):
 	return (cte, cte_args)
 	
 def build_search_query(page, res_per_page, positive_tags, negative_tags):
+	if not positive_tags and not negative_tags:
+		return (LIST_QUERY_NOARGS, (page, res_per_page))
 	cte, cte_args = build_cte(positive_tags, negative_tags)
-	full_query = cte + LIST_QUERY
+	full_query = cte + LIST_QUERY_CTE
 	full_args = cte_args + (page, res_per_page)
 	return (full_query, full_args)
 
 def build_count_query(positive_tags, negative_tags):
+	if not positive_tags and not negative_tags:
+		return (COUNT_QUERY_NOARGS, ())
 	cte, cte_args = build_cte(positive_tags, negative_tags)
-	full_query = cte + COUNT_QUERY
+	full_query = cte + COUNT_QUERY_CTE
 	return (full_query, cte_args)
 
 def multi_tag_sort(y):
