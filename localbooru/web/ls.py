@@ -90,8 +90,11 @@ def multi_tag_sort(y):
 	multiplier = 0
 	if y['type'] in ['general', 'meta']:
 		multiplier = 1000
-	if y['name']:
-		base = (ord(y['name'][0]) * 1000) + ord(y['name'][1])
+	n = y['name']
+	if n:
+		base = (ord(n[0]) * 1000)
+		if len(n) > 1:
+			base += ord(n[1])
 	return base * multiplier
 	
 class ListServer:
