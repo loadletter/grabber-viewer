@@ -59,7 +59,7 @@ def thumb_worker(queue, db_filename, workernum=None):
 		
 class ThumbNailer:
 	def __init__(self, db_filename):
-		self.num_procs = multiprocessing.cpu_count()
+		self.num_procs = multiprocessing.cpu_count() * 2
 		self.queue = multiprocessing.Queue(self.num_procs * 10)
 		for i in range(self.num_procs):
 			p = multiprocessing.Process(target=thumb_worker, args=(self.queue, db_filename, i))
