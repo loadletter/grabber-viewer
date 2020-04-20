@@ -138,8 +138,8 @@ def generate_cache(inputdb, outputdb):
 		cherrypy.log("Metadata size: %i   Found files: %i   Missing files: %i" % (inputrow, inputrow - missing, missing), context='CACHE')
 	
 	tagmap = []
-	for d in data:
-		with outputdb.get() as conn, conn:
+	with outputdb.get() as conn, conn:
+		for d in data:
 			cur = conn.cursor()
 			cur.execute('INSERT OR IGNORE INTO posts(id, website, origid, creation_date, hash, image, width, height, rating) VALUES (?,?,?,?,?,?,?,?,?)', d[0])
 			if not cur.lastrowid:
