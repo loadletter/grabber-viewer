@@ -26,6 +26,7 @@ CREATE TABLE IF NOT EXISTS tags (id INTEGER PRIMARY KEY, name TEXT, type TEXT, U
 CREATE TABLE IF NOT EXISTS tagmap (post INTEGER, tag INTEGER, PRIMARY KEY (post, tag));
 CREATE INDEX IF NOT EXISTS tagmap_post_index ON tagmap (post);
 CREATE INDEX IF NOT EXISTS tagmap_tag_index ON tagmap (tag);
+CREATE INDEX IF NOT EXISTS tag_name_index ON tags (name);
 '''
 
 
@@ -40,8 +41,8 @@ class SerializedConnection:
 		cur.execute('SELECT x FROM y')
 		data = cur.fetchall()
 	'''
-	def __init__(self, filename):
-		self.conn = sqlite3.connect(filename, check_same_thread=False)
+	def __init__(self, filename, isol_level=None):
+		self.conn = sqlite3.connect(filename, check_same_thread=False, isolation_level=isol_level)
 		self.lock = threading.Lock()
 	
 	@contextmanager
@@ -60,7 +61,7 @@ class LocalbooruDB:
 		self._conns = []
 		cherrypy.log("Initializing...", context='DATABASE')
 		for db in DATABASES:
-			serconn = SerializedConnection(os.path.join(database_directory, db + '.sqlite3'))
+			serconn = SerializedConnection(os.path.join(database_directory, db + '.sqlite3'), 'DEFERRED')
 			with serconn.get() as conn, conn:
 				cur = conn.cursor()
 				for statement in globals()[db.upper() + '_DB_SCHEMA'].splitlines():
