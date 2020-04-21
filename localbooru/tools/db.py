@@ -114,13 +114,22 @@ def generate_cache(inputdb, outputdb):
 	inputrow = 0
 	insertrow = 0
 	existingrow = 0
+	duprow = 0
 	tag_types = generate_tag_types()
 	cherrypy.log("Generating cache", context='DATABASE')
+	with outputdb.get() as conn, conn:
+		cur = conn.cursor()
+		cur.execute('SELECT id FROM posts')
+		outputexisting = set(map(lambda x: x[0], cur))
+
 	with inputdb.get() as conn, conn:
 		cur = conn.cursor()
 		cur.execute('SELECT id, website, origid, creation_date, hash, image, width, height, rating, tags FROM posts ORDER BY id DESC')
 		for row in cur:
 			inputrow += 1
+			if row[0] in outputexisting:
+				existingrow +=1
+				continue
 			subpath = IMAGE_NAME_FUNC(row[5])
 			post = row[0:4] + (binascii.a2b_hex(row[4]), subpath) + row[6:9]
 			if not os.path.exists(os.path.join(image_dir, subpath)):
@@ -135,7 +144,7 @@ def generate_cache(inputdb, outputdb):
 					tagt = ''
 				tags.append((tagt, tag))
 			data.append((post, tags))
-		cherrypy.log("Metadata size: %i   Found files: %i   Missing files: %i" % (inputrow, inputrow - missing, missing), context='CACHE')
+		cherrypy.log("Metadata: %i  Existing: %i  Skipped: %i  Found files: %i  Missing files: %i" % (inputrow, len(outputexisting), existingrow, inputrow - (missing + existingrow), missing), context='CACHE')
 	
 	tagmap = []
 	with outputdb.get() as conn, conn:
@@ -143,7 +152,7 @@ def generate_cache(inputdb, outputdb):
 			cur = conn.cursor()
 			cur.execute('INSERT OR IGNORE INTO posts(id, website, origid, creation_date, hash, image, width, height, rating) VALUES (?,?,?,?,?,?,?,?,?)', d[0])
 			if not cur.lastrowid:
-				existingrow += 1
+				duprow += 1
 				continue
 			postid = d[0][0]
 
@@ -159,4 +168,4 @@ def generate_cache(inputdb, outputdb):
 		cur = conn.cursor()
 		cur.executemany('INSERT OR IGNORE INTO tagmap(post, tag) VALUES (?,?)', tagmap)
 		
-	cherrypy.log("Cache generated:  Inserted: %i   Dup: %i" % (insertrow, existingrow), context='CACHE')
+	cherrypy.log("Cache generated:  Inserted: %i   Dup: %i" % (insertrow, duprow), context='CACHE')
