@@ -50,6 +50,10 @@ class SerializedConnection:
 		self.lock.acquire()
 		try:
 			yield self.conn
+			self.conn.commit()
+		except sqlite3.Error:
+			self.conn.rollback()
+			raise
 		finally:
 			self.lock.release()
 
@@ -116,17 +120,21 @@ def generate_cache(inputdb, outputdb):
 	existingrow = 0
 	duprow = 0
 	tag_types = generate_tag_types()
-	cherrypy.log("Generating cache", context='DATABASE')
+	cherrypy.log("Loading", context='CACHE')
 	with outputdb.get() as conn, conn:
 		cur = conn.cursor()
 		cur.execute('SELECT id FROM posts')
 		outputexisting = set(map(lambda x: x[0], cur))
-
+	cherrypy.log("Existing: %i" % len(outputexisting), context='CACHE')
+	hashdedup = set()
 	with inputdb.get() as conn, conn:
 		cur = conn.cursor()
 		cur.execute('SELECT id, website, origid, creation_date, hash, image, width, height, rating, tags FROM posts ORDER BY id DESC')
 		for row in cur:
 			inputrow += 1
+			if row[4] in hashdedup:
+				continue
+			hashdedup.add(row[4])
 			if row[0] in outputexisting:
 				existingrow +=1
 				continue
@@ -144,16 +152,16 @@ def generate_cache(inputdb, outputdb):
 					tagt = ''
 				tags.append((tagt, tag))
 			data.append((post, tags))
-		cherrypy.log("Metadata: %i  Existing: %i  Skipped: %i  Found files: %i  Missing files: %i" % (inputrow, len(outputexisting), existingrow, inputrow - (missing + existingrow), missing), context='CACHE')
+		cherrypy.log("Metadata: %i  Unique: %i  Skipped: %i  Found files: %i  Missing files: %i" % (inputrow, len(hashdedup), existingrow, len(hashdedup) - missing, missing), context='CACHE')
 	
 	tagmap = []
+
 	with outputdb.get() as conn, conn:
+		cur = conn.cursor()
 		for d in data:
-			cur = conn.cursor()
 			cur.execute('INSERT OR IGNORE INTO posts(id, website, origid, creation_date, hash, image, width, height, rating) VALUES (?,?,?,?,?,?,?,?,?)', d[0])
 			if not cur.lastrowid:
 				duprow += 1
-				continue
 			postid = d[0][0]
 
 			tagsrc = d[1]
@@ -164,8 +172,7 @@ def generate_cache(inputdb, outputdb):
 				if res:
 					tagmap.append((postid, res[0]))
 			insertrow += 1
-	with outputdb.get() as conn, conn:
-		cur = conn.cursor()
+
 		cur.executemany('INSERT OR IGNORE INTO tagmap(post, tag) VALUES (?,?)', tagmap)
 		
-	cherrypy.log("Cache generated:  Inserted: %i   Dup: %i" % (insertrow, duprow), context='CACHE')
+	cherrypy.log("Generated: Inserted: %i  Dup: %i" % (insertrow - duprow, duprow), context='CACHE')
